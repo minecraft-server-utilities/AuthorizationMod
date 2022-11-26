@@ -1,5 +1,6 @@
 package com.antonymo.authorizationmod.server.storage;
 
+import com.antonymo.authorizationmod.utils.SHA256;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import net.minecraftforge.api.distmarker.Dist;
@@ -28,7 +29,9 @@ public class StorageProviderFile implements StorageProvider {
     @Override
     public boolean checkPassword(String username, String password) {
         if (GetEntries().containsKey(username)) {
-            return password.equals(GetEntries().get(username).password);
+            var entry = GetEntries().get(username);
+            var passwordHash = SHA256.getSHA256(password + entry.salt);
+            return entry.passwordHash.equals(passwordHash);
         }
         return false;
     }
@@ -61,11 +64,14 @@ public class StorageProviderFile implements StorageProvider {
 
 
     private static class UserEntry {
-        public String password, username;
+        public final String username;
+        public final String passwordHash;
+        public final String salt;
 
-        public UserEntry(String username, String password) {
+        public UserEntry(String username, String passwordHash, String salt) {
             this.username = username;
-            this.password = password;
+            this.passwordHash = passwordHash;
+            this.salt = salt;
         }
     }
 }
