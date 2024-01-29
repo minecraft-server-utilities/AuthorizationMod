@@ -81,13 +81,18 @@ public final class PlayerLoginHandler {
 
         AuthorizationMod.LOGGER.info("Player " + name + " has successfully logged in.");
 
-        NetworkLoader.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new MessageCachePassword(password));
+        NetworkLoader.INSTANCE.send(new MessageCachePassword(password), PacketDistributor.PLAYER.with(player));
         loginList.remove(login);
         postLogin(player, login);
     }
 
     public void playerJoin(final ServerPlayer player) {
         var name = Login.getName(player);
+        AuthorizationMod.LOGGER.info("Player name: " + name);
+        AuthorizationMod.LOGGER.info("Registered names: " + Storage.instance().storageProvider
+                .getAllRegisteredUsername()
+                .stream()
+                .reduce("", (a, b) -> a + ", " + b));
         if (!Storage.instance().storageProvider.registered(name)) {
             player.connection.disconnect(Component.literal("You are not authorized to join this server"));
             return;

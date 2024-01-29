@@ -4,12 +4,11 @@ import com.antonymo.authorizationmod.client.PasswordHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class MessageCachePassword {
     private final String pwd;
@@ -28,11 +27,11 @@ public class MessageCachePassword {
         return new MessageCachePassword(buffer.readCharSequence(len, StandardCharsets.UTF_8).toString());
     }
 
-    public static void handle(MessageCachePassword message, Supplier<NetworkEvent.Context> ctx) {
+    public static void handle(MessageCachePassword message, CustomPayloadEvent.Context ctx) {
         var ip = Objects.requireNonNull(Minecraft.getInstance().getCurrentServer()).ip;
         PasswordHolder.instance().set(ip, message.pwd);
         Optional.ofNullable(Minecraft.getInstance().player).ifPresent(p -> p.sendSystemMessage(Component.literal("Cached password")));
 
-        ctx.get().setPacketHandled(true);
+        ctx.setPacketHandled(true);
     }
 }

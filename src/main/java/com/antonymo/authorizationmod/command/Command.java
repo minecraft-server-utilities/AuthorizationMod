@@ -26,7 +26,7 @@ public class Command {
     }
 
     private static int login(CommandContext<CommandSourceStack> ctx) {
-        ctx.getSource().sendSuccess(Component.literal("Attempting login"), false);
+        ctx.getSource().sendSuccess(() -> Component.literal("Attempting login"), false);
 
         var password = ctx.getArgument("password", String.class);
         var player = ctx.getSource().getPlayer();

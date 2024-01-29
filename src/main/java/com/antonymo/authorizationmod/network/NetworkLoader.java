@@ -3,25 +3,21 @@ package com.antonymo.authorizationmod.network;
 import com.antonymo.authorizationmod.Constants;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.event.network.CustomPayloadEvent;
+import net.minecraftforge.network.ChannelBuilder;
 import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.SimpleChannel;
 
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class NetworkLoader {
-    private static final String PROTOCOL_VERSION = "1";
+    private static final int PROTOCOL_VERSION = 2;
 
-    public static SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(Constants.MODID, "main"),
-            () -> PROTOCOL_VERSION,
-            v -> true,
-            v -> true
-    );
+    public static SimpleChannel INSTANCE = ChannelBuilder
+            .named(new ResourceLocation(Constants.MODID, "main"))
+            .networkProtocolVersion(PROTOCOL_VERSION)
+            .simpleChannel();
 
     private NetworkLoader() {
         throw new UnsupportedOperationException("No instance");
@@ -49,8 +45,12 @@ public class NetworkLoader {
 
     private static <MSG> void registerPacket(Class<MSG> msg, BiConsumer<MSG, FriendlyByteBuf> encoder,
                                              Function<FriendlyByteBuf, MSG> decoder,
-                                             BiConsumer<MSG, Supplier<NetworkEvent.Context>> handler,
+                                             BiConsumer<MSG, CustomPayloadEvent.Context> handler,
                                              final NetworkDirection direction) {
-        INSTANCE.registerMessage(id++, msg, encoder, decoder, handler, Optional.of(direction));
+        INSTANCE.messageBuilder(msg, id++, direction)
+                .encoder(encoder)
+                .decoder(decoder)
+                .consumerNetworkThread(handler)
+                .add();
     }
 }

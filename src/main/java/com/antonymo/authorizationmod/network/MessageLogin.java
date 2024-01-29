@@ -3,10 +3,9 @@ package com.antonymo.authorizationmod.network;
 import com.antonymo.authorizationmod.server.handler.PlayerLoginHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.Supplier;
 
 public class MessageLogin {
     private final String pwd;
@@ -25,11 +24,11 @@ public class MessageLogin {
         return new MessageLogin(buffer.readCharSequence(len, StandardCharsets.UTF_8).toString());
     }
 
-    public static void handle(MessageLogin message, Supplier<NetworkEvent.Context> ctx) {
-        ServerPlayer player = ctx.get().getSender();
+    public static void handle(MessageLogin message, CustomPayloadEvent.Context ctx) {
+        ServerPlayer player = ctx.getSender();
         if (player != null) {
             PlayerLoginHandler.instance().login(player, message.pwd);
         }
-        ctx.get().setPacketHandled(true);
+        ctx.setPacketHandled(true);
     }
 }

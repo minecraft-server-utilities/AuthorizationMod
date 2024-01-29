@@ -18,8 +18,7 @@ public class ServerEventHandler {
     @SubscribeEvent
     public static void playerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         PlayerLoginHandler.instance().playerJoin((ServerPlayer) event.getEntity());
-        // noinspection InstantiationOfUtilityClass
-        NetworkLoader.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) event.getEntity()), new MessageRequestLogin());
+        NetworkLoader.INSTANCE.send(new MessageRequestLogin(), PacketDistributor.PLAYER.with((ServerPlayer) event.getEntity()));
     }
 
     @SubscribeEvent

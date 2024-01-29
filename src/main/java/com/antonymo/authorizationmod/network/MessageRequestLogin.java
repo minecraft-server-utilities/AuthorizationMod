@@ -3,10 +3,9 @@ package com.antonymo.authorizationmod.network;
 import com.antonymo.authorizationmod.client.PasswordHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.event.network.CustomPayloadEvent;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 @SuppressWarnings({"InstantiationOfUtilityClass", "unused"})
 public class MessageRequestLogin {
@@ -21,11 +20,11 @@ public class MessageRequestLogin {
         return new MessageRequestLogin();
     }
 
-    public static void handle(MessageRequestLogin message, Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
+    public static void handle(MessageRequestLogin message, CustomPayloadEvent.Context ctx) {
+        ctx.enqueueWork(() -> {
             var ip = Objects.requireNonNull(Minecraft.getInstance().getCurrentServer()).ip;
-            PasswordHolder.instance().get(ip).ifPresent(p -> NetworkLoader.INSTANCE.sendToServer(new MessageLogin(p)));
+            PasswordHolder.instance().get(ip).ifPresent(p -> NetworkLoader.INSTANCE.send(new MessageLogin(p), ctx.getConnection()));
         });
-        ctx.get().setPacketHandled(true);
+        ctx.setPacketHandled(true);
     }
 }

@@ -23,7 +23,7 @@ public final class ClientLoader {
         var password = PasswordHolder.instance().get(ip);
         password.ifPresentOrElse(p -> {
             AuthorizationMod.LOGGER.info("Sending login packet to the server...");
-            NetworkLoader.INSTANCE.sendToServer(new MessageLogin(p));
+            NetworkLoader.INSTANCE.send(new MessageLogin(p), event.getConnection());
         }, () -> AuthorizationMod.LOGGER.info("No saved password for ip %s".formatted(ip)));
     }
 }
